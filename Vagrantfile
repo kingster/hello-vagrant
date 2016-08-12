@@ -14,7 +14,8 @@ Vagrant.configure("2") do |config|
   # boxes at https://atlas.hashicorp.com/search.
   config.vm.box = "bento/debian-7.11"
 
-  config.vm.hostname = "kinshuk-vbox"
+  config.vm.hostname = "kinshuk-vbox-" + (0...10).map { (97 + rand(26)).chr }.join
+
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -40,7 +41,8 @@ Vagrant.configure("2") do |config|
   #   mac: "7112A7FEB5D5"
 
   config.vm.network :public_network, 
-    :bridge => 'en4: Thunderbolt Ethernet', 
+    # :bridge => 'en4: Thunderbolt Ethernet', 
+    :bridge => 'en0: Wi-Fi (AirPort)', 
     :use_dhcp_assigned_default_route => true,
     :drop_nat_interface_default_route => true
 
@@ -85,6 +87,12 @@ Vagrant.configure("2") do |config|
   #   apt-get update
   #   apt-get install -y apache2
   # SHELL
+
+  config.vm.provision "fix-no-tty", type: "shell" do |s|
+    s.privileged = false
+    s.inline = "sudo sed -i '/tty/!s/mesg n/tty -s \\&\\& mesg n/' /root/.profile"
+  end
+
   config.vm.provision :shell, path: "bootstrap.sh"
 
 
